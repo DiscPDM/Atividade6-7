@@ -9,6 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Button, IconButton, Provider as PaperProvider } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Item {
   id: string;
@@ -36,6 +39,11 @@ const ItemView: React.FC = () => {
       title: inputText.trim(),
     };
     setItems([...items, newItem]);
+    Toast.show({
+      type: 'success',
+      text1: 'Item adicionado!',
+      text2: 'O item foi adicionado com sucesso.',
+    });
     closeModal();
   };
 
@@ -53,7 +61,9 @@ const ItemView: React.FC = () => {
   };
 
   const deleteItem = () => {
-    if (!editingItem) return;
+    if (!editingItem) {
+      return;
+    }
     setItems(items.filter(item => item.id !== editingItem.id));
     closeModal();
   };
@@ -81,66 +91,82 @@ const ItemView: React.FC = () => {
       style={styles.item} 
       onPress={() => openEditModal(item)}
     >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Icon name="assignment" size={20} color="#333" style={{ marginRight: 8 }} />
       <Text>{item.title}</Text>
+      </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Lista de Itens</Text>
-      
-      <TouchableOpacity style={styles.addButton} onPress={openAddModal}>
-        <Text>Adicionar Item</Text>
-      </TouchableOpacity>
+    <PaperProvider>
+      <View style={styles.container}>
+        <Text style={styles.title}>Lista de Itens</Text>
+        
+        <IconButton
+          icon="information"
+          size={30}
+          onPress={() => Alert.alert('Sobre', 'este app é de lista de item.')}
+          style={{ alignSelf: 'center', marginBottom: 10 }}
+        />
+        <Button mode="contained" onPress={openAddModal} style={{ marginBottom: 20 }}>
+          Adicionar Item
+        </Button>
 
-      <FlatList
-        data={items}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-      />
+        <FlatList
+          data={items}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+        />
 
-      <Modal 
-        visible={modalVisible} 
-        transparent={true} 
-        animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.dialog}>
-            <Text style={styles.modalTitle}>
-              {editingItem ? 'Editar Item' : 'Novo Item'}
-            </Text>
+        <Modal 
+          visible={modalVisible} 
+          transparent={true} 
+          animationType="fade"
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.dialog}>
+              <Text style={styles.modalTitle}>
+                {editingItem ? 'Editar Item' : 'Novo Item'}
+              </Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Digite o título"
-              value={inputText}
-              onChangeText={setInputText}
-            />
+              <TextInput
+                style={styles.input}
+                placeholder="Digite o título"
+                value={inputText}
+                onChangeText={setInputText}
+              />
 
-            <View style={styles.buttons}>
-              <TouchableOpacity style={styles.button} onPress={closeModal}>
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </TouchableOpacity>
+              <View style={styles.buttons}>
+                <Button mode="outlined" onPress={closeModal} style={styles.button}>
+                  Cancelar
+                </Button>
 
-              {editingItem && (
-                <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={deleteItem}>
-                  <Text style={[styles.buttonText, styles.deleteButtonText]}>Excluir</Text>
-                </TouchableOpacity>
-              )}
+                {editingItem && (
+                  <Button
+                    mode="outlined"
+                    onPress={deleteItem}
+                    style={[styles.button, styles.deleteButton]}
+                    labelStyle={styles.deleteButtonText}
+                  >
+                    Excluir
+                  </Button>
+                )}
 
-              <TouchableOpacity 
-                style={styles.button} 
-                onPress={editingItem ? updateItem : addItem}
-              >
-                <Text style={styles.buttonText}>
+                <Button
+                  mode="contained"
+                  onPress={editingItem ? updateItem : addItem}
+                  style={styles.button}
+                >
                   {editingItem ? 'Salvar' : 'Adicionar'}
-                </Text>
-              </TouchableOpacity>
+                </Button>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+      <Toast /> {}
+    </PaperProvider>
   );
 };
 
@@ -154,12 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
-  },
-  addButton: {
-    backgroundColor: '#ddd',
-    padding: 10,
-    marginBottom: 20,
-    alignItems: 'center',
   },
   item: {
     padding: 15,
@@ -197,16 +217,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#ddd',
-    padding: 8,
     flex: 1,
     marginHorizontal: 4,
-    alignItems: 'center',
-    borderRadius: 4,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: '500',
   },
   deleteButton: {
     backgroundColor: '#ffebee',
