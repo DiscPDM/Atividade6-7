@@ -75,6 +75,7 @@ export const commonStyles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    flex: 1,
   },
   itemTablet: {
     padding: 20,
@@ -82,9 +83,12 @@ export const commonStyles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
     borderBottomWidth: 0,
+    flex: 1,
+    minHeight: 80,
   },
   itemLandscape: {
     padding: 12,
+    flex: 1,
   },
 
   itemText: {

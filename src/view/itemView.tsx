@@ -63,7 +63,7 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
       ]} 
       onPress={() => controller.openEditModal(item)}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
         {item.imageUrl ? (
           <Image 
             source={{ uri: item.imageUrl }} 
@@ -82,7 +82,8 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
         )}
         <Text style={[
           commonStyles.itemText,
-          isTablet && commonStyles.itemTextTablet
+          isTablet && commonStyles.itemTextTablet,
+          { flex: 1, flexWrap: 'wrap' }
         ]}>
           {item.title}
         </Text>
@@ -120,6 +121,7 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
             isLandscape && commonStyles.listContainerLandscape,
             isWeb && commonStyles.listContainerWeb
           ]}
+          columnWrapperStyle={isTablet ? { justifyContent: 'space-between' } : undefined}
           showsVerticalScrollIndicator={false}
         />
 
