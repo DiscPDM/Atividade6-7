@@ -1,38 +1,70 @@
-import { useState } from 'react';
 import { Item } from '../models/item';
-import { addItem, deleteItem, updateItem } from '../services/itemService';
+import { fetchCatImage } from '../services/itemService';
+import { ItemAction } from '../reducers/itemReducer';
 
-export function useItemController() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [dialogVisible, setDialogVisible] = useState(false);
+export class ItemController {
+  private dispatch: React.Dispatch<ItemAction>;
 
-  function handleAddItem(title: string) {
-    setItems(prev => addItem(prev, title));
+  constructor(dispatch: React.Dispatch<ItemAction>) {
+    this.dispatch = dispatch;
   }
 
-  function handleUpdateItem(id: string, title: string) {
-    setItems(prev => updateItem(prev, id, title));
+  async addItem(inputText: string): Promise<void> {
+    if (!inputText.trim()) {
+      return;
+    }
+
+    const imageUrl = await fetchCatImage();
+    const newItem: Item = {
+      id: Date.now().toString(),
+      title: inputText.trim(),
+      imageUrl: imageUrl || undefined,
+    };
+
+    this.dispatch({ type: 'ADD_ITEM', payload: newItem });
+    this.dispatch({ type: 'CLEAR_FORM' });
   }
 
-  function handleDeleteItem(id: string) {
-    setItems(prev => deleteItem(prev, id));
+  updateItem(inputText: string, editingItem: Item | null): void {
+    if (!inputText.trim() || !editingItem) {
+      return;
+    }
+
+    const updatedItem = {
+      ...editingItem,
+      title: inputText.trim(),
+    };
+
+    this.dispatch({ type: 'UPDATE_ITEM', payload: updatedItem });
+    this.dispatch({ type: 'CLEAR_FORM' });
   }
 
-  function openDialog() {
-    setDialogVisible(true);
+  deleteItem(editingItem: Item | null): void {
+    if (!editingItem) {
+      return;
+    }
+
+    this.dispatch({ type: 'DELETE_ITEM', payload: editingItem.id });
+    this.dispatch({ type: 'CLEAR_FORM' });
   }
 
-  function closeDialog() {
-    setDialogVisible(false);
+  openAddModal(): void {
+    this.dispatch({ type: 'SET_INPUT_TEXT', payload: '' });
+    this.dispatch({ type: 'SET_EDITING_ITEM', payload: null });
+    this.dispatch({ type: 'SET_MODAL_VISIBLE', payload: true });
   }
 
-  return {
-    items,
-    dialogVisible,
-    addItem: handleAddItem,
-    updateItem: handleUpdateItem,
-    deleteItem: handleDeleteItem,
-    openDialog,
-    closeDialog,
-  };
+  openEditModal(item: Item): void {
+    this.dispatch({ type: 'SET_INPUT_TEXT', payload: item.title });
+    this.dispatch({ type: 'SET_EDITING_ITEM', payload: item });
+    this.dispatch({ type: 'SET_MODAL_VISIBLE', payload: true });
+  }
+
+  closeModal(): void {
+    this.dispatch({ type: 'CLEAR_FORM' });
+  }
+
+  setInputText(text: string): void {
+    this.dispatch({ type: 'SET_INPUT_TEXT', payload: text });
+  }
 }

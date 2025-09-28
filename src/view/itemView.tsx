@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import {
   Alert,
-  Dimensions,
   FlatList,
+  Image,
   Modal,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,122 +12,102 @@ import {
 import { Button, IconButton } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Item, NavigationProps } from '../models/item';
+import { useResponsive } from './useResponsive';
+import { commonStyles } from '../styles/commonStyles';
+import { ItemController } from '../controllers/itemController';
+import { itemReducer, initialItemState } from '../reducers/itemReducer';
 
-interface Item {
-  id: string;
-  title: string;
-}
+const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
+  const [state, dispatch] = useReducer(itemReducer, initialItemState);
+  const [controller] = React.useState(() => new ItemController(dispatch));
 
-const ItemView: React.FC = () => {
-  const [items, setItems] = useState<Item[]>([
-    { id: '1', title: 'Item Exemplo 1' },
-    { id: '2', title: 'Item Exemplo 2' },
-  ]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingItem, setEditingItem] = useState<Item | null>(null);
-  const [inputText, setInputText] = useState('');
+  const { items, modalVisible, editingItem, inputText } = state;
+  const { isTablet, isLandscape, isWeb } = useResponsive();
 
-  const { width, height } = Dimensions.get('window');
-  const isTablet = width >= 768;
-  const isLandscape = width > height;
-
-  const generateId = () => Date.now().toString();
-
-  const addItem = () => {
+  const handleAddItem = async () => {
     if (!inputText.trim()) {
-      Alert.alert('Erro', 'Digite um título');
+      Alert.alert('Erro', 'Digite o nome do gato');
       return;
     }
-    const newItem: Item = {
-      id: generateId(),
-      title: inputText.trim(),
-    };
-    setItems([...items, newItem]);
+    
+    await controller.addItem(inputText);
     Toast.show({
       type: 'success',
       text1: 'Item adicionado!',
       text2: 'O item foi adicionado com sucesso.',
     });
-    closeModal();
   };
 
-  const updateItem = () => {
+  const handleUpdateItem = () => {
     if (!inputText.trim() || !editingItem) {
-      Alert.alert('Erro', 'Digite um título');
+      Alert.alert('Erro', 'Digite o nome do gato');
       return;
     }
-    setItems(items.map(item =>
-      item.id === editingItem.id
-        ? { ...item, title: inputText.trim() }
-        : item
-    ));
-    closeModal();
+    controller.updateItem(inputText, editingItem);
   };
 
-  const deleteItem = () => {
+  const handleDeleteItem = () => {
     if (!editingItem) {
       return;
     }
-    setItems(items.filter(item => item.id !== editingItem.id));
-    closeModal();
-  };
-
-  const closeModal = () => {
-    setInputText('');
-    setEditingItem(null);
-    setModalVisible(false);
-  };
-
-  const openAddModal = () => {
-    setInputText('');
-    setEditingItem(null);
-    setModalVisible(true);
-  };
-
-  const openEditModal = (item: Item) => {
-    setInputText(item.title);
-    setEditingItem(item);
-    setModalVisible(true);
+    controller.deleteItem(editingItem);
   };
 
   const renderItem = ({ item }: { item: Item }) => (
     <TouchableOpacity 
       style={[
-        styles.item,
-        isTablet && styles.itemTablet,
-        isLandscape && styles.itemLandscape
+        commonStyles.item,
+        isTablet && commonStyles.itemTablet,
+        isLandscape && commonStyles.itemLandscape
       ]} 
-      onPress={() => openEditModal(item)}
+      onPress={() => controller.openEditModal(item)}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <Icon 
-        name="assignment" 
-        size={isTablet ? 24 : 20} 
-        color="#333" 
-        style={{ marginRight: isTablet ? 12 : 8 }} 
-      />
-      <Text style={[
-        styles.itemText,
-        isTablet && styles.itemTextTablet
-      ]}>
-        {item.title}
-      </Text>
+        {item.imageUrl ? (
+          <Image 
+            source={{ uri: item.imageUrl }} 
+            style={[
+              commonStyles.itemImage,
+              isTablet && commonStyles.itemImageTablet
+            ]}
+          />
+        ) : (
+          <Icon 
+            name="assignment" 
+            size={isTablet ? 24 : 20} 
+            color="#333" 
+            style={{ marginRight: isTablet ? 12 : 8 }} 
+          />
+        )}
+        <Text style={[
+          commonStyles.itemText,
+          isTablet && commonStyles.itemTextTablet
+        ]}>
+          {item.title}
+        </Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-        <Text style={styles.title}>Lista de Itens</Text>
+    <View style={[
+      commonStyles.container,
+      isTablet && commonStyles.containerTablet
+    ]}>
+        <Text style={[
+          commonStyles.title,
+          isTablet && commonStyles.titleTablet
+        ]}>Lista de Gatos</Text>
         
         <IconButton
           icon="information"
           size={30}
-          onPress={() => Alert.alert('Sobre', 'este app é de lista de item.')}
+          onPress={() => Alert.alert('Sobre', 'lista de gatos')}
           style={{ alignSelf: 'center', marginBottom: 10 }}
         />
-        <Button mode="contained" onPress={openAddModal} style={{ marginBottom: 20 }}>
-          Adicionar Item
+        <Button mode="contained" onPress={() => controller.openAddModal()} style={{ marginBottom: 20 }}>
+          Adicionar Gato
         </Button>
 
         <FlatList
@@ -137,9 +116,11 @@ const ItemView: React.FC = () => {
           keyExtractor={item => item.id}
           numColumns={isTablet ? 2 : 1}
           contentContainerStyle={[
-            styles.listContainer,
-            isLandscape && styles.listContainerLandscape
+            commonStyles.listContainer,
+            isLandscape && commonStyles.listContainerLandscape,
+            isWeb && commonStyles.listContainerWeb
           ]}
+          showsVerticalScrollIndicator={false}
         />
 
         <Modal 
@@ -147,49 +128,63 @@ const ItemView: React.FC = () => {
           transparent={true} 
           animationType="fade"
         >
-          <View style={styles.modalOverlay}>
+          <View style={commonStyles.modalOverlay}>
             <View style={[
-              styles.dialog,
-              isTablet && styles.dialogTablet,
-              isLandscape && styles.dialogLandscape
+              commonStyles.dialog,
+              isTablet && commonStyles.dialogTablet,
+              isLandscape && commonStyles.dialogLandscape,
+              isWeb && commonStyles.dialogWeb
             ]}>
               <Text style={[
-                styles.modalTitle,
-                isTablet && styles.modalTitleTablet
+                commonStyles.modalTitle,
+                isTablet && commonStyles.modalTitleTablet
               ]}>
-                {editingItem ? 'Editar Item' : 'Novo Item'}
+                {editingItem ? 'Editar Gato' : 'Novo Gato'}
               </Text>
 
               <TextInput
                 style={[
-                  styles.input,
-                  isTablet && styles.inputTablet
+                  commonStyles.input,
+                  isTablet && commonStyles.inputTablet
                 ]}
-                placeholder="Digite o título"
+                placeholder="Digite o nome do gato" 
                 value={inputText}
-                onChangeText={setInputText}
+                onChangeText={(text) => controller.setInputText(text)}
               />
 
-              <View style={styles.buttons}>
-                <Button mode="outlined" onPress={closeModal} style={styles.button}>
+              <View style={commonStyles.buttons}>
+                <Button mode="outlined" onPress={() => controller.closeModal()} style={commonStyles.buttonRow}>
                   Cancelar
                 </Button>
 
                 {editingItem && (
                   <Button
                     mode="outlined"
-                    onPress={deleteItem}
-                    style={[styles.button, styles.deleteButton]}
-                    labelStyle={styles.deleteButtonText}
+                    onPress={handleDeleteItem}
+                    style={[commonStyles.buttonRow, commonStyles.deleteButton]}
+                    labelStyle={commonStyles.deleteButtonText}
                   >
                     Excluir
                   </Button>
                 )}
 
+                {editingItem && (
+                  <Button
+                    mode="outlined"
+                    onPress={() => {
+                      controller.closeModal();
+                      navigation.navigate('ItemDetail', { item: editingItem });
+                    }}
+                    style={commonStyles.buttonRow}
+                  >
+                    Ver Detalhes
+                  </Button>
+                )}
+
                 <Button
                   mode="contained"
-                  onPress={editingItem ? updateItem : addItem}
-                  style={styles.button}
+                  onPress={editingItem ? handleUpdateItem : handleAddItem}
+                  style={commonStyles.buttonRow}
                 >
                   {editingItem ? 'Salvar' : 'Adicionar'}
                 </Button>
@@ -202,102 +197,5 @@ const ItemView: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    paddingTop: 50,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  listContainerLandscape: {
-    paddingHorizontal: 10,
-  },
-  item: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  itemTablet: {
-    padding: 20,
-    margin: 5,
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-    borderBottomWidth: 0,
-  },
-  itemLandscape: {
-    padding: 12,
-  },
-  itemText: {
-    fontSize: 16,
-  },
-  itemTextTablet: {
-    fontSize: 18,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  dialog: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
-    borderRadius: 8,
-    width: '80%',
-    maxWidth: 400,
-  },
-  dialogTablet: {
-    width: '60%',
-    maxWidth: 600,
-    padding: 30,
-  },
-  dialogLandscape: {
-    width: '70%',
-    maxWidth: 500,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalTitleTablet: {
-    fontSize: 22,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 20,
-    borderRadius: 4,
-  },
-  inputTablet: {
-    padding: 15,
-    fontSize: 16,
-  },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  deleteButton: {
-    backgroundColor: '#ffebee',
-  },
-  deleteButtonText: {
-    color: '#d32f2f',
-  },
-});
 
 export default ItemView;
