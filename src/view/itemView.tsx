@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  Dimensions,
   FlatList,
   Modal,
   StyleSheet,
@@ -9,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Button, IconButton, Provider as PaperProvider } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -26,6 +27,10 @@ const ItemView: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [inputText, setInputText] = useState('');
+
+  const { width, height } = Dimensions.get('window');
+  const isTablet = width >= 768;
+  const isLandscape = width > height;
 
   const generateId = () => Date.now().toString();
 
@@ -88,19 +93,32 @@ const ItemView: React.FC = () => {
 
   const renderItem = ({ item }: { item: Item }) => (
     <TouchableOpacity 
-      style={styles.item} 
+      style={[
+        styles.item,
+        isTablet && styles.itemTablet,
+        isLandscape && styles.itemLandscape
+      ]} 
       onPress={() => openEditModal(item)}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <Icon name="assignment" size={20} color="#333" style={{ marginRight: 8 }} />
-      <Text>{item.title}</Text>
+      <Icon 
+        name="assignment" 
+        size={isTablet ? 24 : 20} 
+        color="#333" 
+        style={{ marginRight: isTablet ? 12 : 8 }} 
+      />
+      <Text style={[
+        styles.itemText,
+        isTablet && styles.itemTextTablet
+      ]}>
+        {item.title}
+      </Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <PaperProvider>
-      <View style={styles.container}>
+    <View style={styles.container}>
         <Text style={styles.title}>Lista de Itens</Text>
         
         <IconButton
@@ -117,6 +135,11 @@ const ItemView: React.FC = () => {
           data={items}
           renderItem={renderItem}
           keyExtractor={item => item.id}
+          numColumns={isTablet ? 2 : 1}
+          contentContainerStyle={[
+            styles.listContainer,
+            isLandscape && styles.listContainerLandscape
+          ]}
         />
 
         <Modal 
@@ -125,13 +148,23 @@ const ItemView: React.FC = () => {
           animationType="fade"
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.dialog}>
-              <Text style={styles.modalTitle}>
+            <View style={[
+              styles.dialog,
+              isTablet && styles.dialogTablet,
+              isLandscape && styles.dialogLandscape
+            ]}>
+              <Text style={[
+                styles.modalTitle,
+                isTablet && styles.modalTitleTablet
+              ]}>
                 {editingItem ? 'Editar Item' : 'Novo Item'}
               </Text>
 
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  isTablet && styles.inputTablet
+                ]}
                 placeholder="Digite o título"
                 value={inputText}
                 onChangeText={setInputText}
@@ -164,9 +197,8 @@ const ItemView: React.FC = () => {
             </View>
           </View>
         </Modal>
+        <Toast />
       </View>
-      <Toast /> {}
-    </PaperProvider>
   );
 };
 
@@ -181,10 +213,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
   },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  listContainerLandscape: {
+    paddingHorizontal: 10,
+  },
   item: {
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+  itemTablet: {
+    padding: 20,
+    margin: 5,
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    borderBottomWidth: 0,
+  },
+  itemLandscape: {
+    padding: 12,
+  },
+  itemText: {
+    fontSize: 16,
+  },
+  itemTextTablet: {
+    fontSize: 18,
   },
   modalOverlay: {
     flex: 1,
@@ -198,6 +252,16 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 8,
     width: '80%',
+    maxWidth: 400,
+  },
+  dialogTablet: {
+    width: '60%',
+    maxWidth: 600,
+    padding: 30,
+  },
+  dialogLandscape: {
+    width: '70%',
+    maxWidth: 500,
   },
   modalTitle: {
     fontSize: 18,
@@ -205,11 +269,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
+  modalTitleTablet: {
+    fontSize: 22,
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
     marginBottom: 20,
+    borderRadius: 4,
+  },
+  inputTablet: {
+    padding: 15,
+    fontSize: 16,
   },
   buttons: {
     flexDirection: 'row',
