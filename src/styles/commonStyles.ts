@@ -1,69 +1,72 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export const commonStyles = StyleSheet.create({
   content: {
-    padding: 20,
-    paddingTop: 50,
+    padding: Math.min(width * 0.05, 30),
+    paddingTop: Math.min(height * 0.06, 50),
   },
   contentTablet: {
-    padding: 30,
+    padding: Math.min(width * 0.08, 50),
   },
   contentLandscape: {
-    padding: 15,
+    padding: Math.min(width * 0.04, 20),
   },
   contentWeb: {
     maxWidth: 1000,
     alignSelf: 'center',
     width: '100%',
+    padding: Math.min(width * 0.05, 40),
   },
 
   title: {
-    fontSize: 24,
+    fontSize: Math.min(width * 0.06, 28),
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: Math.min(height * 0.025, 20),
     textAlign: 'center',
   },
   titleTablet: {
-    fontSize: 28,
+    fontSize: Math.min(width * 0.07, 32),
   },
 
   button: {
-    minWidth: 120,
+    minWidth: Math.min(width * 0.3, 120),
   },
   buttonTablet: {
-    minWidth: 150,
-    paddingVertical: 8,
+    minWidth: Math.min(width * 0.4, 150),
+    paddingVertical: Math.min(height * 0.01, 8),
   },
 
   card: {
-    marginBottom: 20,
+    marginBottom: Math.min(height * 0.025, 20),
     elevation: 2,
   },
   cardTablet: {
-    marginBottom: 25,
+    marginBottom: Math.min(height * 0.03, 25),
   },
   cardTitle: {
-    fontSize: 18,
-    marginBottom: 15,
+    fontSize: Math.min(width * 0.045, 20),
+    marginBottom: Math.min(height * 0.02, 15),
   },
   cardTitleTablet: {
-    fontSize: 20,
+    fontSize: Math.min(width * 0.05, 22),
   },
 
   container: {
     flex: 1,
-    padding: 20,
-    paddingTop: 50,
+    padding: Math.min(width * 0.05, 30),
+    paddingTop: Math.min(height * 0.06, 50),
   },
   containerTablet: {
-    padding: 30,
+    padding: Math.min(width * 0.08, 50),
   },
 
   listContainer: {
-    paddingBottom: 20,
+    paddingBottom: Math.min(height * 0.025, 20),
   },
   listContainerLandscape: {
-    paddingHorizontal: 10,
+    paddingHorizontal: Math.min(width * 0.025, 15),
   },
   listContainerWeb: {
     maxWidth: 1200,
@@ -72,43 +75,43 @@ export const commonStyles = StyleSheet.create({
   },
 
   item: {
-    padding: 15,
+    padding: Math.min(width * 0.04, 20),
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     flex: 1,
   },
   itemTablet: {
-    padding: 20,
-    margin: 5,
-    borderRadius: 8,
+    padding: Math.min(width * 0.05, 25),
+    margin: Math.min(width * 0.01, 8),
+    borderRadius: Math.min(width * 0.02, 10),
     backgroundColor: '#f9f9f9',
     borderBottomWidth: 0,
     flex: 1,
-    minHeight: 80,
+    minHeight: Math.min(height * 0.1, 80),
   },
   itemLandscape: {
-    padding: 12,
+    padding: Math.min(width * 0.03, 15),
     flex: 1,
   },
 
   itemText: {
-    fontSize: 16,
+    fontSize: Math.min(width * 0.04, 18),
   },
   itemTextTablet: {
-    fontSize: 18,
+    fontSize: Math.min(width * 0.045, 20),
   },
 
   itemImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 8,
+    width: Math.min(width * 0.1, 50),
+    height: Math.min(width * 0.1, 50),
+    borderRadius: Math.min(width * 0.05, 25),
+    marginRight: Math.min(width * 0.02, 12),
   },
   itemImageTablet: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
+    width: Math.min(width * 0.12, 60),
+    height: Math.min(width * 0.12, 60),
+    borderRadius: Math.min(width * 0.06, 30),
+    marginRight: Math.min(width * 0.03, 15),
   },
 
   modalOverlay: {
@@ -119,16 +122,16 @@ export const commonStyles = StyleSheet.create({
   },
   dialog: {
     backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
-    borderRadius: 8,
+    padding: Math.min(width * 0.05, 25),
+    margin: Math.min(width * 0.05, 25),
+    borderRadius: Math.min(width * 0.02, 10),
     width: '80%',
     maxWidth: 400,
   },
   dialogTablet: {
     width: '60%',
     maxWidth: 600,
-    padding: 30,
+    padding: Math.min(width * 0.08, 40),
   },
   dialogLandscape: {
     width: '70%',
@@ -141,35 +144,35 @@ export const commonStyles = StyleSheet.create({
   },
 
   modalTitle: {
-    fontSize: 18,
+    fontSize: Math.min(width * 0.045, 20),
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: Math.min(height * 0.025, 20),
     textAlign: 'center',
   },
   modalTitleTablet: {
-    fontSize: 22,
+    fontSize: Math.min(width * 0.055, 24),
   },
 
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 20,
-    borderRadius: 4,
+    padding: Math.min(width * 0.025, 15),
+    marginBottom: Math.min(height * 0.025, 20),
+    borderRadius: Math.min(width * 0.01, 5),
   },
   inputTablet: {
-    padding: 15,
-    fontSize: 16,
+    padding: Math.min(width * 0.04, 20),
+    fontSize: Math.min(width * 0.04, 18),
   },
 
   buttons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: Math.min(height * 0.025, 20),
   },
   buttonRow: {
     flex: 1,
-    marginHorizontal: 4,
+    marginHorizontal: Math.min(width * 0.01, 5),
   },
   deleteButton: {
     backgroundColor: '#ffebee',

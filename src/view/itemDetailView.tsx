@@ -6,29 +6,35 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Item, RouteProps } from '../models/item';
 import { useResponsive } from './useResponsive';
 import { commonStyles } from '../styles/commonStyles';
+import { useTheme } from '../contexts/ThemeContext';
+
+const { width, height } = Dimensions.get('window');
 
 const ItemDetailView: React.FC<RouteProps> = ({ route, navigation }) => {
   const { item } = route.params;
+  const { colors } = useTheme();
   const { isTablet, isLandscape, isWeb } = useResponsive();
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} color="#333" />
+          <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[
           styles.title,
-          isTablet && styles.titleTablet
+          isTablet && styles.titleTablet,
+          { color: colors.text }
         ]}>
           Detalhes do Gato
         </Text>
@@ -51,21 +57,23 @@ const ItemDetailView: React.FC<RouteProps> = ({ route, navigation }) => {
           />
         )}
         
-        <View style={styles.textContainer}>
-          <Text style={[
-            styles.itemTitle,
-            isTablet && styles.itemTitleTablet
-          ]}>
-            {item.title}
-          </Text>
-          
-          <Text style={[
-            styles.itemId,
-            isTablet && styles.itemIdTablet
-          ]}>
-            ID: {item.id}
-          </Text>
-        </View>
+            <View style={styles.textContainer}>
+              <Text style={[
+                styles.itemTitle,
+                isTablet && styles.itemTitleTablet,
+                { color: colors.text }
+              ]}>
+                {item.title}
+              </Text>
+              
+              <Text style={[
+                styles.itemId,
+                isTablet && styles.itemIdTablet,
+                { color: colors.secondary }
+              ]}>
+                ID: {item.id}
+              </Text>
+            </View>
 
         <View style={styles.actions}>
           <Button 
@@ -106,69 +114,69 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 50,
+    padding: Math.min(width * 0.05, 25),
+    paddingTop: Math.min(height * 0.06, 50),
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   backButton: {
-    marginRight: 15,
-    padding: 5,
+    marginRight: Math.min(width * 0.04, 20),
+    padding: Math.min(width * 0.01, 8),
   },
   title: {
-    fontSize: 20,
+    fontSize: Math.min(width * 0.05, 24),
     fontWeight: 'bold',
     color: '#333',
   },
   titleTablet: {
-    fontSize: 24,
+    fontSize: Math.min(width * 0.06, 28),
   },
   detailImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    marginBottom: 20,
+    width: Math.min(width * 0.5, 300),
+    height: Math.min(width * 0.5, 300),
+    borderRadius: Math.min(width * 0.25, 150),
+    marginBottom: Math.min(height * 0.025, 20),
   },
   detailImageTablet: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
+    width: Math.min(width * 0.6, 400),
+    height: Math.min(width * 0.6, 400),
+    borderRadius: Math.min(width * 0.3, 200),
   },
   detailImageLandscape: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: Math.min(width * 0.4, 250),
+    height: Math.min(width * 0.4, 250),
+    borderRadius: Math.min(width * 0.2, 125),
   },
   textContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: Math.min(height * 0.04, 30),
   },
   itemTitle: {
-    fontSize: 18,
+    fontSize: Math.min(width * 0.045, 20),
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: Math.min(height * 0.012, 10),
   },
   itemTitleTablet: {
-    fontSize: 22,
+    fontSize: Math.min(width * 0.055, 24),
   },
   itemId: {
-    fontSize: 14,
+    fontSize: Math.min(width * 0.035, 16),
     color: '#666',
     textAlign: 'center',
   },
   itemIdTablet: {
-    fontSize: 16,
+    fontSize: Math.min(width * 0.04, 18),
   },
   actions: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
+    paddingHorizontal: Math.min(width * 0.05, 25),
   },
   editButton: {
-    marginLeft: 10,
+    marginLeft: Math.min(width * 0.025, 15),
   },
 });
 

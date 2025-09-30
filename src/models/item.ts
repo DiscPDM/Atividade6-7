@@ -16,3 +16,10 @@ export interface RouteProps {
   };
   navigation: any;
 }
+
+export type RootStackParamList = {
+  MainTabs: undefined;
+  ItemDetail: {
+    item: Item;
+  };
+};

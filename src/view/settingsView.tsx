@@ -1,22 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   ScrollView,
   StyleSheet,
   Switch,
   Text,
   View,
+  Dimensions,
 } from 'react-native';
 import { Button, Card, Title, Paragraph } from 'react-native-paper';
 import { useResponsive } from './useResponsive';
 import { commonStyles } from '../styles/commonStyles';
+import { useTheme } from '../contexts/ThemeContext';
+import { useSettings } from '../contexts/SettingsContext';
+
+const { width, height } = Dimensions.get('window');
 
 const SettingsView: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
+  const { colors, isDark, toggleTheme } = useTheme();
+  const { notifications, layout, toggleNotifications, setLayout } = useSettings();
   const { isTablet, isLandscape, isWeb } = useResponsive();
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[
         commonStyles.content,
         isTablet && commonStyles.contentTablet,
@@ -25,32 +30,36 @@ const SettingsView: React.FC = () => {
       ]}>
         <Title style={[
           commonStyles.title,
-          isTablet && commonStyles.titleTablet
+          isTablet && commonStyles.titleTablet,
+          { color: colors.text }
         ]}>
           Configurações
         </Title>
 
         <Card style={[
           commonStyles.card,
-          isTablet && commonStyles.cardTablet
+          isTablet && commonStyles.cardTablet,
+          { backgroundColor: colors.surface }
         ]}>
           <Card.Content>
             <Title style={[
               commonStyles.cardTitle,
-              isTablet && commonStyles.cardTitleTablet
+              isTablet && commonStyles.cardTitleTablet,
+              { color: colors.text }
             ]}>
               Aparência
             </Title>
             <View style={styles.settingRow}>
               <Text style={[
                 styles.settingLabel,
-                isTablet && styles.settingLabelTablet
+                isTablet && styles.settingLabelTablet,
+                { color: colors.text }
               ]}>
                 modo noturno
               </Text>
               <Switch
-                value={darkMode}
-                onValueChange={setDarkMode}
+                value={isDark}
+                onValueChange={toggleTheme}
               />
             </View>
           </Card.Content>
@@ -58,25 +67,28 @@ const SettingsView: React.FC = () => {
 
         <Card style={[
           commonStyles.card,
-          isTablet && commonStyles.cardTablet
+          isTablet && commonStyles.cardTablet,
+          { backgroundColor: colors.surface }
         ]}>
           <Card.Content>
             <Title style={[
               commonStyles.cardTitle,
-              isTablet && commonStyles.cardTitleTablet
+              isTablet && commonStyles.cardTitleTablet,
+              { color: colors.text }
             ]}>
               Notificações
             </Title>
             <View style={styles.settingRow}>
               <Text style={[
                 styles.settingLabel,
-                isTablet && styles.settingLabelTablet
+                isTablet && styles.settingLabelTablet,
+                { color: colors.text }
               ]}>
                 receber notificações
               </Text>
               <Switch
                 value={notifications}
-                onValueChange={setNotifications}
+                onValueChange={toggleNotifications}
               />
             </View>
           </Card.Content>
@@ -84,24 +96,28 @@ const SettingsView: React.FC = () => {
 
         <Card style={[
           commonStyles.card,
-          isTablet && commonStyles.cardTablet
+          isTablet && commonStyles.cardTablet,
+          { backgroundColor: colors.surface }
         ]}>
           <Card.Content>
             <Title style={[
               commonStyles.cardTitle,
-              isTablet && commonStyles.cardTitleTablet
+              isTablet && commonStyles.cardTitleTablet,
+              { color: colors.text }
             ]}>
               Sobre o App
             </Title>
             <Paragraph style={[
               styles.paragraph,
-              isTablet && styles.paragraphTablet
+              isTablet && styles.paragraphTablet,
+              { color: colors.text }
             ]}>
               lista de gatos
             </Paragraph>
             <Paragraph style={[
               styles.paragraph,
-              isTablet && styles.paragraphTablet
+              isTablet && styles.paragraphTablet,
+              { color: colors.text }
             ]}>
               imagens aleatórias de gatos
             </Paragraph>
@@ -135,25 +151,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   settingLabel: {
-    fontSize: 16,
+    fontSize: Math.min(width * 0.04, 18),
     flex: 1,
   },
   settingLabelTablet: {
-    fontSize: 18,
+    fontSize: Math.min(width * 0.045, 20),
   },
   paragraph: {
-    fontSize: 14,
-    marginBottom: 5,
+    fontSize: Math.min(width * 0.035, 16),
+    marginBottom: Math.min(height * 0.006, 5),
   },
   paragraphTablet: {
-    fontSize: 16,
+    fontSize: Math.min(width * 0.04, 18),
   },
   resetButton: {
-    marginTop: 20,
-    paddingVertical: 8,
+    marginTop: Math.min(height * 0.025, 20),
+    paddingVertical: Math.min(height * 0.01, 8),
   },
   resetButtonTablet: {
-    paddingVertical: 12,
+    paddingVertical: Math.min(height * 0.015, 12),
   },
 });
 

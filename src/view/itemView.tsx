@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import {
   Alert,
   FlatList,
@@ -17,13 +17,29 @@ import { useResponsive } from './useResponsive';
 import { commonStyles } from '../styles/commonStyles';
 import { ItemController } from '../controllers/itemController';
 import { itemReducer, initialItemState } from '../reducers/itemReducer';
+import { useTheme } from '../contexts/ThemeContext';
+import { useSettings } from '../contexts/SettingsContext';
+import { loadItems } from '../services/storageService';
 
 const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
   const [state, dispatch] = useReducer(itemReducer, initialItemState);
   const [controller] = React.useState(() => new ItemController(dispatch));
+  const { colors } = useTheme();
+  const { layout } = useSettings();
 
   const { items, modalVisible, editingItem, inputText } = state;
   const { isTablet, isLandscape, isWeb } = useResponsive();
+
+  useEffect(() => {
+    loadSavedItems();
+  }, []);
+
+  const loadSavedItems = async () => {
+    const savedItems = await loadItems();
+    savedItems.forEach(item => {
+      dispatch({ type: 'ADD_ITEM', payload: item });
+    });
+  };
 
   const handleAddItem = async () => {
     if (!inputText.trim()) {
@@ -31,7 +47,7 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
       return;
     }
     
-    await controller.addItem(inputText);
+    await controller.addItem(inputText, items);
     Toast.show({
       type: 'success',
       text1: 'Item adicionado!',
@@ -39,19 +55,19 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
     });
   };
 
-  const handleUpdateItem = () => {
+  const handleUpdateItem = async () => {
     if (!inputText.trim() || !editingItem) {
       Alert.alert('Erro', 'Digite o nome do gato');
       return;
     }
-    controller.updateItem(inputText, editingItem);
+    await controller.updateItem(inputText, editingItem, items);
   };
 
-  const handleDeleteItem = () => {
+  const handleDeleteItem = async () => {
     if (!editingItem) {
       return;
     }
-    controller.deleteItem(editingItem);
+    await controller.deleteItem(editingItem, items);
   };
 
   const renderItem = ({ item }: { item: Item }) => (
@@ -59,7 +75,8 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
       style={[
         commonStyles.item,
         isTablet && commonStyles.itemTablet,
-        isLandscape && commonStyles.itemLandscape
+        isLandscape && commonStyles.itemLandscape,
+        { backgroundColor: colors.surface, borderBottomColor: colors.border }
       ]} 
       onPress={() => controller.openEditModal(item)}
     >
@@ -76,14 +93,14 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
           <Icon 
             name="assignment" 
             size={isTablet ? 24 : 20} 
-            color="#333" 
+            color={colors.text} 
             style={{ marginRight: isTablet ? 12 : 8 }} 
           />
         )}
         <Text style={[
           commonStyles.itemText,
           isTablet && commonStyles.itemTextTablet,
-          { flex: 1, flexWrap: 'wrap' }
+          { flex: 1, flexWrap: 'wrap', color: colors.text }
         ]}>
           {item.title}
         </Text>
@@ -94,11 +111,13 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
   return (
     <View style={[
       commonStyles.container,
-      isTablet && commonStyles.containerTablet
+      isTablet && commonStyles.containerTablet,
+      { backgroundColor: colors.background }
     ]}>
         <Text style={[
           commonStyles.title,
-          isTablet && commonStyles.titleTablet
+          isTablet && commonStyles.titleTablet,
+          { color: colors.text }
         ]}>Lista de Gatos</Text>
         
         <IconButton
@@ -111,19 +130,19 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
           Adicionar Gato
         </Button>
 
-        <FlatList
-          data={items}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          numColumns={isTablet ? 2 : 1}
-          contentContainerStyle={[
-            commonStyles.listContainer,
-            isLandscape && commonStyles.listContainerLandscape,
-            isWeb && commonStyles.listContainerWeb
-          ]}
-          columnWrapperStyle={isTablet ? { justifyContent: 'space-between' } : undefined}
-          showsVerticalScrollIndicator={false}
-        />
+            <FlatList
+              data={items}
+              renderItem={renderItem}
+              keyExtractor={item => item.id}
+              numColumns={layout === 'grid' && isTablet ? 2 : 1}
+              contentContainerStyle={[
+                commonStyles.listContainer,
+                isLandscape && commonStyles.listContainerLandscape,
+                isWeb && commonStyles.listContainerWeb
+              ]}
+              columnWrapperStyle={layout === 'grid' && isTablet ? { justifyContent: 'space-between' } : undefined}
+              showsVerticalScrollIndicator={false}
+            />
 
         <Modal 
           visible={modalVisible} 
@@ -135,11 +154,13 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
               commonStyles.dialog,
               isTablet && commonStyles.dialogTablet,
               isLandscape && commonStyles.dialogLandscape,
-              isWeb && commonStyles.dialogWeb
+              isWeb && commonStyles.dialogWeb,
+              { backgroundColor: colors.surface }
             ]}>
               <Text style={[
                 commonStyles.modalTitle,
-                isTablet && commonStyles.modalTitleTablet
+                isTablet && commonStyles.modalTitleTablet,
+                { color: colors.text }
               ]}>
                 {editingItem ? 'Editar Gato' : 'Novo Gato'}
               </Text>
@@ -147,9 +168,15 @@ const ItemView: React.FC<NavigationProps> = ({ navigation }) => {
               <TextInput
                 style={[
                   commonStyles.input,
-                  isTablet && commonStyles.inputTablet
+                  isTablet && commonStyles.inputTablet,
+                  { 
+                    backgroundColor: colors.background,
+                    borderColor: colors.border,
+                    color: colors.text
+                  }
                 ]}
                 placeholder="Digite o nome do gato" 
+                placeholderTextColor={colors.secondary}
                 value={inputText}
                 onChangeText={(text) => controller.setInputText(text)}
               />
